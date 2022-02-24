@@ -8,8 +8,8 @@ class Group(models.Model):
     def __str__(self):
         return self.title
 
-    title = models.CharField()
-    slug = models.CharField()
+    title = models.CharField(max_length=100)
+    slug = models.CharField(max_length=10)
     description = models.TextField()
 
 
