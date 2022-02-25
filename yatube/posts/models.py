@@ -5,13 +5,12 @@ User = get_user_model()
 
 
 class Group(models.Model):
-    def __str__(self):
-        return self.title
-
     title = models.CharField(max_length=100)
     slug = models.CharField(max_length=10)
     description = models.TextField()
 
+    def __str__(self):
+        return self.title
 
 class Post(models.Model):
     text = models.TextField()
