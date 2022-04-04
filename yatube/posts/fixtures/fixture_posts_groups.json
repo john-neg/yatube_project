@@ -1,0 +1,20 @@
+[
+  {
+    "model": "posts.group",
+    "pk": 1,
+    "fields": {
+      "title": "Test Group 1",
+      "slug": "test-group-1",
+      "description": "Тестовая группа 1"
+    }
+  },
+  {
+    "model": "posts.group",
+    "pk": 2,
+    "fields": {
+      "title": "Test Group 2",
+      "slug": "test-group-2",
+      "description": "Тестовая группа 2"
+    }
+  }
+]

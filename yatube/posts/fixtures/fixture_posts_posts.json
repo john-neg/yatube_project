@@ -1,0 +1,192 @@
+[
+  {
+    "model": "posts.post",
+    "pk": 1,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 1",
+      "pub_date": "2022-03-31T00:01:00Z",
+      "author": 1,
+      "group": 1
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 2,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 2",
+      "pub_date": "2022-03-31T00:02:00Z",
+      "author": 1,
+      "group": 1
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 3,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 3",
+      "pub_date": "2022-03-31T00:03:00Z",
+      "author": 1,
+      "group": 1
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 4,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 4",
+      "pub_date": "2022-03-31T00:04:00Z",
+      "author": 1,
+      "group": 1
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 5,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 5",
+      "pub_date": "2022-03-31T00:05:00Z",
+      "author": 1,
+      "group": 1
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 6,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 6",
+      "pub_date": "2022-03-31T00:06:00Z",
+      "author": 1,
+      "group": 1
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 7,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 7",
+      "pub_date": "2022-03-31T00:07:00Z",
+      "author": 1,
+      "group": 1
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 8,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 8",
+      "pub_date": "2022-03-31T00:08:00Z",
+      "author": 1,
+      "group": 1
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 9,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 9",
+      "pub_date": "2022-03-31T00:09:00Z",
+      "author": 1,
+      "group": 1
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 10,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 10",
+      "pub_date": "2022-03-31T00:10:00Z",
+      "author": 1,
+      "group": 1
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 11,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 11",
+      "pub_date": "2022-03-31T00:11:00Z",
+      "author": 1,
+      "group": 1
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 12,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 12",
+      "pub_date": "2022-03-31T00:12:00Z",
+      "author": 1,
+      "group": 1
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 13,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 13",
+      "pub_date": "2022-03-31T00:13:00Z",
+      "author": 1,
+      "group": 2
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 14,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 14",
+      "pub_date": "2022-03-31T00:14:00Z",
+      "author": 1,
+      "group": 2
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 15,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 15",
+      "pub_date": "2022-03-31T00:15:00Z",
+      "author": 1,
+      "group": 2
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 16,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 16",
+      "pub_date": "2022-03-31T00:16:00Z",
+      "author": 2,
+      "group": null
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 17,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 17",
+      "pub_date": "2022-03-31T00:17:00Z",
+      "author": 2,
+      "group": null
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 18,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 18",
+      "pub_date": "2022-03-31T00:18:00Z",
+      "author": 2,
+      "group": null
+    }
+  },
+  {
+    "model": "posts.post",
+    "pk": 19,
+    "fields": {
+      "text": "Тестовый текст тестового сообщения 19",
+      "pub_date": "2022-03-31T00:19:00Z",
+      "author": 2,
+      "group": null
+    }
+  }
+]

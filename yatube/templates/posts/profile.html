@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}
+  Профайл пользователя {{ user_data.get_full_name }}
+{% endblock %}
+{% block content %}
+  <div class="container py-5">
+    <h1>Все посты пользователя {{ user_data.get_full_name }} </h1>
+    <h3>Всего постов: {{ user_data.posts.count }} </h3>
+    <hr>
+    {% for post in page_obj %}
+      {% include 'includes/post.html' with show_group=True %}
+    {% empty %}
+        У этого пользователя пока нет записей
+    {% endfor %}
+    {% include 'includes/paginator.html' %}
+  </div>
+{% endblock %}
