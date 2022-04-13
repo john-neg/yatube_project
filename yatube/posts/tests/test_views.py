@@ -254,3 +254,7 @@ class PaginatorViewsTests(TestCase):
             len(response.context['page_obj']),
             Post.objects.count() % PaginatorViewsTests.POSTS_QTY
         )
+
+    def test_comment_shows_on_post_page(self):
+        """После успешной отправки комментарий появляется на странице поста."""
+        pass

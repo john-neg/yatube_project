@@ -7,7 +7,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 
-from ..models import Group, Post
+from ..models import Group, Post, Comment
 
 User = get_user_model()
 
@@ -269,3 +269,80 @@ class PostFormsTests(TestCase):
                 pub_date=pub_date
             ).exists(),
             "Сообщение изменено не автором")
+
+
+class CommentFormTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create_user(username='AuthorUser')
+        cls.post = Post.objects.create(
+            author=cls.user,
+            text='Тестовый текст нового тестового сообщения',
+        )
+
+    def setUp(self):
+        # Создаем неавторизованный клиент
+        self.guest_client = Client()
+        # Создаем авторизованный клиент
+        self.user = CommentFormTests.user
+        self.authorized_client = Client()
+        self.authorized_client.force_login(self.user)
+
+    def test_create_comment_authorised(self):
+        """Валидная форма создает запись в Comment."""
+        comment_count = Comment.objects.count()
+        # Подготавливаем данные для передачи в форму
+        form_data = {
+            'text': 'Тестовый комментарий',
+            'post': CommentFormTests.post.id,
+        }
+        response = self.authorized_client.post(
+            reverse(
+                'posts:add_comment',
+                kwargs={'post_id': CommentFormTests.post.id}
+            ),
+            data=form_data,
+            follow=True
+        )
+        self.assertRedirects(response, reverse(
+            'posts:post_detail', kwargs={'post_id': CommentFormTests.post.id}
+        ))
+        self.assertEqual(
+            Comment.objects.count(),
+            comment_count + 1,
+            "Количество комментариев не изменилось"
+        )
+        self.assertTrue(
+            Comment.objects.filter(
+                author=CommentFormTests.user,
+                text='Тестовый комментарий',
+                post=CommentFormTests.post.id,
+            ).exists(),
+            "Комментарий не создан")
+
+    def test_create_comment_unauthorised(self):
+        """Проверка создания комментариев не авторизированным пользователем."""
+        comment_count = Comment.objects.count()
+        form_data = {
+            'text': 'Тестовый комментарий',
+            'post': CommentFormTests.post.id,
+        }
+        response = self.guest_client.post(
+            reverse(
+                'posts:add_comment',
+                kwargs={'post_id': CommentFormTests.post.id}
+            ),
+            data=form_data,
+            follow=True
+        )
+        self.assertRedirects(
+            response,
+            f"{reverse('users:login')}?next="
+            f"{reverse('posts:add_comment', kwargs={'post_id': CommentFormTests.post.id})}"
+        )
+        self.assertEqual(
+            Comment.objects.count(),
+            comment_count,
+            "Количество комментариев изменилось"
+        )

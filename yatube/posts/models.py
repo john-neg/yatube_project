@@ -63,3 +63,37 @@ class Post(models.Model):
 
     def __str__(self):
         return self.text[:settings.POST_TEXT_LIMIT]
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Запись'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Автор'
+    )
+    text = models.TextField(
+        blank=False,
+        verbose_name='Текст комментария',
+        help_text='Введите текст комментария'
+    )
+    created = models.DateTimeField(
+        'Дата комментария',
+        auto_now_add=True
+    )
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
+        # ordering = (
+        #     '-created',
+        # )
+
+    def __str__(self):
+        return self.text[:settings.POST_TEXT_LIMIT]
