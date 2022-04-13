@@ -27,7 +27,7 @@ class Post(models.Model):
     text = models.TextField(
         blank=False,
         verbose_name='Текст поста',
-        help_text='Введите текст поста'
+        help_text='Текст нового поста'
     )
     pub_date = models.DateTimeField(
         'Дата публикации',
@@ -52,6 +52,7 @@ class Post(models.Model):
         'Картинка',
         upload_to='posts/',
         blank=True,
+        help_text='Загрузите картинку',
     )
 
     class Meta:
@@ -91,9 +92,9 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-        # ordering = (
-        #     '-created',
-        # )
+        ordering = (
+            '-created',
+        )
 
     def __str__(self):
         return self.text[:settings.POST_TEXT_LIMIT]

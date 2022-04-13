@@ -1,9 +1,12 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 
-from .models import Post, Group, User, Comment
+from .models import Post, Group
 from .forms import PostForm, CommentForm
 from .func import paginator
+
+User = get_user_model()
 
 
 def index(request):
