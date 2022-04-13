@@ -9,7 +9,7 @@ from django.urls import reverse
 from django import forms
 from typing import ClassVar
 
-from ..models import Group, Post
+from ..models import Group, Post, Comment
 
 User = get_user_model()
 
@@ -49,6 +49,11 @@ class PostViewsTests(TestCase):
             text='1 Тестовый текст тестового сообщения',
             group=cls.group,
             image=uploaded,
+        )
+        cls.comment = Comment.objects.create(
+            author=cls.user,
+            text='Тестовый комментарий',
+            post=cls.post,
         )
 
     @classmethod
@@ -217,6 +222,15 @@ class PostViewsTests(TestCase):
             'Пост отображается в чужой группе'
         )
 
+    def test_comment_shows_on_post_page(self):
+        """После успешной отправки комментарий появляется на странице поста."""
+        response = self.guest_client.get(reverse(
+            'posts:post_detail',
+            kwargs={'post_id': PostViewsTests.post.id}
+        ))
+        post = response.context['post']
+        self.assertEqual(post.comments, PostViewsTests.post.comments)
+
 
 class PaginatorViewsTests(TestCase):
     fixtures = [
@@ -254,7 +268,3 @@ class PaginatorViewsTests(TestCase):
             len(response.context['page_obj']),
             Post.objects.count() % PaginatorViewsTests.POSTS_QTY
         )
-
-    def test_comment_shows_on_post_page(self):
-        """После успешной отправки комментарий появляется на странице поста."""
-        pass
