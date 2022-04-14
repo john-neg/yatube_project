@@ -2,16 +2,15 @@ import shutil
 import tempfile
 
 from django.conf import settings
-from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django import forms
 from typing import ClassVar
 
-from ..models import Group, Post, Comment
+from ..models import Group, Post, Comment, User
 
-User = get_user_model()
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -63,6 +62,7 @@ class PostViewsTests(TestCase):
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
 
     def setUp(self):
+        cache.clear()
         self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(PostViewsTests.user)
@@ -232,6 +232,34 @@ class PostViewsTests(TestCase):
         self.assertEqual(post.comments, PostViewsTests.post.comments)
 
 
+class CacheViewsTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create_user(username='AuthorUser')
+        cls.group = Group.objects.create(
+            title='Новая тестовая группа',
+            slug='test-slug',
+            description='Тестовое описание новой группы',
+        )
+        cls.post = Post.objects.create(
+            author=cls.user,
+            text='1 Тестовый текст тестового сообщения',
+            group=cls.group,
+        )
+
+    def setUp(self):
+        cache.clear()
+        self.guest_client = Client()
+
+    def test_cache_work_on_index_page(self):
+        response = self.guest_client.get(reverse('posts:index'))
+        cache_data = response.content
+        self.post.delete()
+        response2 = self.guest_client.get(reverse('posts:index'))
+        self.assertEqual(cache_data, response2.content)
+
+
 class PaginatorViewsTests(TestCase):
     fixtures = [
         "fixture_posts_users.json",
@@ -241,10 +269,11 @@ class PaginatorViewsTests(TestCase):
     POSTS_QTY: ClassVar[int] = 10
 
     def setUp(self):
+        cache.clear()
         self.guest_client = Client()
 
     def test_first_page_contains_ten_records(self):
-        """Паджинатор выводит правльное количесво постов на странице."""
+        """Паджинатор выводит правильное количество постов на странице."""
         paginator_pages = [
             reverse('posts:index'),
             reverse('posts:group_list', kwargs={'slug': 'test-group-1'}),

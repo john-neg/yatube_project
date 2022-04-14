@@ -1,15 +1,13 @@
-from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
-from .models import Post, Group
+from .models import Post, Group, User
 from .forms import PostForm, CommentForm
 from .func import paginator
 
-User = get_user_model()
 
-
-def index(request):
+def index(request: HttpRequest) -> HttpResponse:
     template = 'posts/index.html'
     post_list = Post.objects.select_related('author', 'group').all()
     page_obj = paginator(post_list, request)
@@ -19,7 +17,7 @@ def index(request):
     return render(request, template, context)
 
 
-def group_posts(request, slug):
+def group_posts(request: HttpRequest, slug: str) -> HttpResponse:
     template = 'posts/group_list.html'
     group = get_object_or_404(Group, slug=slug)
     post_list = group.posts.select_related('author').all()
@@ -31,7 +29,7 @@ def group_posts(request, slug):
     return render(request, template, context)
 
 
-def profile(request, username):
+def profile(request: HttpRequest, username: str) -> HttpResponse:
     template = 'posts/profile.html'
     user = get_object_or_404(User, username=username)
     post_list = user.posts.select_related('group').all()
@@ -43,7 +41,7 @@ def profile(request, username):
     return render(request, template, context)
 
 
-def post_detail(request, post_id):
+def post_detail(request: HttpRequest, post_id: int) -> HttpResponse:
     template = 'posts/post_detail.html'
     post = get_object_or_404(
         Post.objects.select_related('author', 'group'),
@@ -60,7 +58,7 @@ def post_detail(request, post_id):
 
 
 @login_required
-def post_create(request):
+def post_create(request: HttpRequest) -> HttpResponse:
     template = 'posts/create_post.html'
     form = PostForm(
         request.POST or None,
@@ -75,7 +73,7 @@ def post_create(request):
 
 
 @login_required
-def post_edit(request, post_id):
+def post_edit(request: HttpRequest, post_id: int) -> HttpResponse:
     template = 'posts/create_post.html'
     post = get_object_or_404(Post, pk=post_id)
     if post.author != request.user:
@@ -96,7 +94,7 @@ def post_edit(request, post_id):
 
 
 @login_required
-def add_comment(request, post_id):
+def add_comment(request: HttpRequest, post_id: int) -> HttpResponse:
     post = get_object_or_404(Post, pk=post_id)
     form = CommentForm(request.POST or None)
     if form.is_valid():
