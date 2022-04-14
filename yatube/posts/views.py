@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 
-from .models import Post, Group, User
+from .models import Post, Group, User, Follow
 from .forms import PostForm, CommentForm
 from .func import paginator
 
@@ -31,13 +31,18 @@ def group_posts(request: HttpRequest, slug: str) -> HttpResponse:
 
 def profile(request: HttpRequest, username: str) -> HttpResponse:
     template = 'posts/profile.html'
-    user = get_object_or_404(User, username=username)
-    post_list = user.posts.select_related('group').all()
+    author = get_object_or_404(User, username=username)
+    post_list = author.posts.select_related('group').all()
     page_obj = paginator(post_list, request)
+    user = request.user
+    if user.is_anonymous:
+        following = False
+    else:
+        following = author.following.filter(user=user).exists()
     context = {
-        'user_data': user,
+        'author': author,
         'page_obj': page_obj,
-        'following': True
+        'following': following,
     }
     return render(request, template, context)
 
@@ -108,19 +113,30 @@ def add_comment(request: HttpRequest, post_id: int) -> HttpResponse:
 
 @login_required
 def follow_index(request: HttpRequest) -> HttpResponse:
-    # информация о текущем пользователе доступна в переменной request.user
-    user = request.user
-    context = {}
+    """Сообщения от авторов, на которых подписан пользователь."""
+    post_list = Post.objects.filter(author__following__user=request.user)
+    page_obj = paginator(post_list, request)
+    context = {
+        'page_obj': page_obj
+    }
     return render(request, 'posts/follow.html', context)
 
 
 @login_required
 def profile_follow(request: HttpRequest, username: str) -> HttpResponse:
-    # Подписаться на автора
-    pass
+    """Подписаться на автора"""
+    user = request.user
+    author = get_object_or_404(User, username=username)
+    Follow.objects.get_or_create(user=user, author=author)
+    return redirect('posts:profile', author)
 
 
 @login_required
 def profile_unfollow(request: HttpRequest, username: str) -> HttpResponse:
-    # Дизлайк, отписка
-    pass
+    """Дизлайк, отписка."""
+    user = request.user
+    author = get_object_or_404(User, username=username)
+    follow = Follow.objects.get(user=user, author=author)
+    if follow:
+        follow.delete()
+    return redirect('posts:profile', author)

@@ -324,14 +324,15 @@ class CommentFormTests(TestCase):
     def test_create_comment_unauthorised(self):
         """Проверка создания комментариев не авторизированным пользователем."""
         comment_count = Comment.objects.count()
+        post_id = CommentFormTests.post.id
         form_data = {
             'text': 'Тестовый комментарий',
-            'post': CommentFormTests.post.id,
+            'post': post_id,
         }
         response = self.guest_client.post(
             reverse(
                 'posts:add_comment',
-                kwargs={'post_id': CommentFormTests.post.id}
+                kwargs={'post_id': post_id}
             ),
             data=form_data,
             follow=True
@@ -339,7 +340,7 @@ class CommentFormTests(TestCase):
         self.assertRedirects(
             response,
             f"{reverse('users:login')}?next="
-            f"{reverse('posts:add_comment', kwargs={'post_id': CommentFormTests.post.id})}"
+            f"{reverse('posts:add_comment', kwargs={'post_id': post_id})}"
         )
         self.assertEqual(
             Comment.objects.count(),

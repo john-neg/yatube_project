@@ -9,8 +9,7 @@ from django.urls import reverse
 from django import forms
 from typing import ClassVar
 
-from ..models import Group, Post, Comment, User
-
+from ..models import Group, Post, Comment, User, Follow
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
@@ -88,6 +87,7 @@ class PostViewsTests(TestCase):
                 'posts:post_edit',
                 kwargs={'post_id': PostViewsTests.post.id}
             ): 'posts/create_post.html',
+            reverse('posts:follow_index'): 'posts/follow.html',
         }
         for reverse_name, template in templates_page_names.items():
             with self.subTest(template=template):
@@ -143,7 +143,7 @@ class PostViewsTests(TestCase):
         self.assertEqual(post_author_username_0, PostViewsTests.user.username)
         self.assertEqual(post_group_0, PostViewsTests.post.group)
         self.assertEqual(post_image_0, PostViewsTests.post.image)
-        self.assertEqual(response.context['user_data'], PostViewsTests.user)
+        self.assertEqual(response.context['author'], PostViewsTests.user)
 
     def test_post_detail_show_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
@@ -296,4 +296,66 @@ class PaginatorViewsTests(TestCase):
         self.assertEqual(
             len(response.context['page_obj']),
             Post.objects.count() % PaginatorViewsTests.POSTS_QTY
+        )
+
+
+class FollowerViewsTest(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = User.objects.create_user(username='user')
+        cls.user2 = User.objects.create_user(username='user2')
+        cls.author = User.objects.create_user(username='author')
+        cls.post = Post.objects.create(
+            author=cls.author,
+            text='1 Тестовый текст тестового сообщения',
+        )
+
+    def setUp(self):
+        self.authorized_client = Client()
+        self.authorized_client.force_login(FollowerViewsTest.user)
+        self.authorized_client2 = Client()
+        self.authorized_client2.force_login(FollowerViewsTest.user2)
+
+    def test_user_follow_unfollow(self):
+        """Проверка, что пользователь может подписываться и отписываться."""
+        user = FollowerViewsTest.user
+        author = FollowerViewsTest.author
+        first_count = len(author.following.filter(user=user))
+        self.authorized_client.get(reverse(
+            'posts:profile_follow',
+            kwargs={'username': author.username}
+        ))
+        second_count = len(author.following.filter(user=user))
+        self.assertEqual(second_count, first_count + 1, 'Не работает подписка')
+        self.authorized_client.get(reverse(
+            'posts:profile_unfollow',
+            kwargs={'username': author.username}
+        ))
+        third_count = len(author.following.filter(user=user))
+        self.assertEqual(third_count, second_count - 1, 'Не работает отписка')
+
+    def test_follow_index_shows_right_posts(self):
+        """
+        Новая запись пользователя появляется в ленте тех,
+        кто на него подписан и не появляется в ленте тех, кто не подписан.
+        """
+        self.authorized_client.get(reverse(
+            'posts:profile_follow',
+            kwargs={'username': self.author.username}
+        ))
+        post = Post.objects.create(
+            author=self.author,
+            text='2 Тестовый текст тестового сообщения',
+        )
+        response = self.authorized_client.get(reverse('posts:follow_index'))
+        self.assertEqual(
+            post,
+            response.context['page_obj'][0],
+            'Не отображается пост автора по подписке'
+        )
+        response2 = self.authorized_client2.get(reverse('posts:follow_index'))
+        self.assertFalse(
+            post in response2.context['page_obj'],
+            'Отображается пост автора на которого не подписан'
         )
