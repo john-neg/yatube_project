@@ -37,6 +37,7 @@ def profile(request: HttpRequest, username: str) -> HttpResponse:
     context = {
         'user_data': user,
         'page_obj': page_obj,
+        'following': True
     }
     return render(request, template, context)
 
@@ -103,3 +104,23 @@ def add_comment(request: HttpRequest, post_id: int) -> HttpResponse:
         comment.post = post
         comment.save()
     return redirect('posts:post_detail', post_id=post_id)
+
+
+@login_required
+def follow_index(request: HttpRequest) -> HttpResponse:
+    # информация о текущем пользователе доступна в переменной request.user
+    user = request.user
+    context = {}
+    return render(request, 'posts/follow.html', context)
+
+
+@login_required
+def profile_follow(request: HttpRequest, username: str) -> HttpResponse:
+    # Подписаться на автора
+    pass
+
+
+@login_required
+def profile_unfollow(request: HttpRequest, username: str) -> HttpResponse:
+    # Дизлайк, отписка
+    pass

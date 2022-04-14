@@ -107,5 +107,4 @@ class PostURLTests(TestCase):
         for url, template in templates_url_names.items():
             with self.subTest(url=url):
                 response = self.author_client.get(url)
-                print(response.content)
                 self.assertTemplateUsed(response, template)
