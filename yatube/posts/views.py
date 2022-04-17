@@ -35,10 +35,8 @@ def profile(request: HttpRequest, username: str) -> HttpResponse:
     post_list = author.posts.select_related('group').all()
     page_obj = paginator(post_list, request)
     user = request.user
-    if user.is_anonymous:
-        following = False
-    else:
-        following = author.following.filter(user=user).exists()
+    following = (user.is_authenticated
+                 and author.following.filter(user=user).exists())
     context = {
         'author': author,
         'page_obj': page_obj,
@@ -53,8 +51,8 @@ def post_detail(request: HttpRequest, post_id: int) -> HttpResponse:
         Post.objects.select_related('author', 'group'),
         pk=post_id
     )
-    form = CommentForm
-    comments = post.comments.select_related('post').all()
+    form = CommentForm()
+    comments = post.comments.select_related('author').all()
     context = {
         'post': post,
         'form': form,
@@ -117,7 +115,7 @@ def follow_index(request: HttpRequest) -> HttpResponse:
     post_list = Post.objects.filter(author__following__user=request.user)
     page_obj = paginator(post_list, request)
     context = {
-        'page_obj': page_obj
+        'page_obj': page_obj,
     }
     return render(request, 'posts/follow.html', context)
 
@@ -127,7 +125,8 @@ def profile_follow(request: HttpRequest, username: str) -> HttpResponse:
     """Подписаться на автора"""
     user = request.user
     author = get_object_or_404(User, username=username)
-    Follow.objects.get_or_create(user=user, author=author)
+    if user != author:
+        Follow.objects.get_or_create(user=user, author=author)
     return redirect('posts:profile', author)
 
 
@@ -137,6 +136,5 @@ def profile_unfollow(request: HttpRequest, username: str) -> HttpResponse:
     user = request.user
     author = get_object_or_404(User, username=username)
     follow = Follow.objects.get(user=user, author=author)
-    if follow:
-        follow.delete()
+    follow.delete()
     return redirect('posts:profile', author)

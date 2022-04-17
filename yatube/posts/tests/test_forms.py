@@ -10,9 +10,6 @@ from django.urls import reverse
 from ..models import Group, Post, Comment
 
 User = get_user_model()
-
-# Для сохранения media-файлов в тестах будет использоваться
-# временная папка TEMP_MEDIA_ROOT, а потом мы ее удалим
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
 
 
@@ -183,7 +180,54 @@ class PostFormsTests(TestCase):
             ).exists(),
             "Сообщение не изменилось")
 
+    def test_edit_post_image(self):
+        """"Проверка редактирования изображения поста"""
+        post_id = PostFormsTests.post.pk
+        pub_date = PostFormsTests.post.pub_date
+        posts_count = Post.objects.count()
+        blank_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x01\x00'
+            b'\x01\x00\x90\x00\x00\xff\x00\x00'
+            b'\x00\x00\x00\x21\xf9\x04\x05\x10'
+            b'\x00\x00\x00\x2c\x00\x00\x00\x00'
+            b'\x01\x00\x01\x00\x00\x02\x02\x04'
+            b'\x01\x00\x3b'
+        )
+        uploaded = SimpleUploadedFile(
+            name='blank.gif',
+            content=blank_gif,
+            content_type='image/gif'
+        )
+        form_edit_data = {
+            'text': PostFormsTests.post.text,
+            'group': PostFormsTests.post.group.id,
+            'image': uploaded
+        }
+        response = self.author_client.post(
+            reverse('posts:post_edit', kwargs={'post_id': post_id}),
+            data=form_edit_data,
+            follow=True
+        )
+        self.assertRedirects(response, reverse(
+            'posts:post_detail', kwargs={'post_id': post_id}
+        ))
+        self.assertEqual(
+            Post.objects.count(),
+            posts_count,
+            "Изменилось количество постов"
+        )
+        self.assertTrue(
+            Post.objects.filter(
+                author=PostFormsTests.user,
+                text=PostFormsTests.post.text,
+                group=PostFormsTests.post.group,
+                image='posts/blank.gif',
+                pub_date=pub_date,
+            ).exists(),
+            "Сообщение не изменилось")
+
     def test_edit_post_without_group(self):
+        """Проверка редактирования поста без группы"""
         post_id = PostFormsTests.post2.pk
         pub_date = PostFormsTests.post2.pub_date
         form_edit_no_group = {

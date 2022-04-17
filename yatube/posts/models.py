@@ -5,8 +5,19 @@ from django.conf import settings
 User = get_user_model()
 
 
+class PubDateModel(models.Model):
+    """Абстрактная модель. Добавляет дату создания."""
+    pub_date = models.DateTimeField(
+        'Дата создания',
+        auto_now_add=True
+    )
+
+    class Meta:
+        abstract = True
+
+
 class Group(models.Model):
-    """Model for posts groups"""
+    """Модель для групп постов."""
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=10, unique=True)
     description = models.TextField()
@@ -22,16 +33,12 @@ class Group(models.Model):
         return self.title
 
 
-class Post(models.Model):
-    """Base post model"""
+class Post(PubDateModel):
+    """Базовая модель поста."""
     text = models.TextField(
         blank=False,
         verbose_name='Текст поста',
         help_text='Текст нового поста'
-    )
-    pub_date = models.DateTimeField(
-        'Дата публикации',
-        auto_now_add=True
     )
     author = models.ForeignKey(
         User,
@@ -66,7 +73,8 @@ class Post(models.Model):
         return self.text[:settings.POST_TEXT_LIMIT]
 
 
-class Comment(models.Model):
+class Comment(PubDateModel):
+    """Модель для комментариев."""
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
@@ -84,16 +92,12 @@ class Comment(models.Model):
         verbose_name='Текст комментария',
         help_text='Введите текст комментария'
     )
-    created = models.DateTimeField(
-        'Дата комментария',
-        auto_now_add=True
-    )
 
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
         ordering = (
-            '-created',
+            '-pub_date',
         )
 
     def __str__(self):
@@ -101,6 +105,7 @@ class Comment(models.Model):
 
 
 class Follow(models.Model):
+    """Модель для подписчиков."""
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -113,3 +118,16 @@ class Follow(models.Model):
         related_name='following',
         verbose_name='Автор'
     )
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+        constraints = [
+            models.UniqueConstraint(
+                name="unique_relationships",
+                fields=["user", "author"],
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.user} подписан на {self.author}"
